@@ -6,10 +6,12 @@ import tkinter as tk
 from tkinter import ttk
 import os,sys
 import datetime
+from tkinter import ttk
+from etc import common
+from tkinter import messagebox
 
-target = 'promocode'
-mapping = configparser.ConfigParser()
-mapping.read('D:\develop\django\project\python\etc\mapping.ini')
+myEnv = common.env_setting[os.path.basename(__file__)]
+prm = myrules.params[os.path.basename(__file__)]
 
 class CreateDeliveryPromocodeAPP(tk.Frame):
     def __init__(self,master):
@@ -33,7 +35,7 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
         self.valid_bikou = tk.Label(master,text="(形式：YYYY-MM-DD)")
         self.valid_entry = tk.Entry(master,width=40)
         self.sent_type_lb = tk.Label(master,text="配信種別")
-        self.sent_type_combo = ttk.Combobox(master,values=myrules.sent_type_option,textvariable=tk.StringVar,width=38,state="readonly")
+        self.sent_type_combo = ttk.Combobox(master,values=common.sent_type_option,textvariable=tk.StringVar,width=38,state="readonly")
         self.sent_type_combo.bind("<<ComboboxSelected>>",self.update_combo_reward_type)
         self.reward_type_lb = tk.Label(master,text="特典種別")
         self.reward_type_combo = ttk.Combobox(master,textvariable=tk.StringVar,width=38,state="readonly")
@@ -42,22 +44,22 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
 
         ## GUI画面に各項目を配置 ##
         # ラベル
-        self.tilte_lb_01.grid(myrules.grid_param["title"],row=0)
-        self.folder_lb.grid(myrules.grid_param["left"],row=1)
-        self.folder_button.grid(myrules.grid_param["right"],row=1)
-        self.tilte_lb_02.grid(myrules.grid_param["title"],row=2)
-        self.cpid_lb.grid(myrules.grid_param["left"],row=3)
-        self.description_lb.grid(myrules.grid_param["left"],row=4)
-        self.sent_type_lb.grid(myrules.grid_param["left"],row=5)
-        self.reward_type_lb.grid(myrules.grid_param["left"],row=6)
+        self.tilte_lb_01.grid(common.grid_param["title"],row=0)
+        self.folder_lb.grid(common.grid_param["left"],row=1)
+        self.folder_button.grid(common.grid_param["right"],row=1)
+        self.tilte_lb_02.grid(common.grid_param["title"],row=2)
+        self.cpid_lb.grid(common.grid_param["left"],row=3)
+        self.description_lb.grid(common.grid_param["left"],row=4)
+        self.sent_type_lb.grid(common.grid_param["left"],row=5)
+        self.reward_type_lb.grid(common.grid_param["left"],row=6)
         
         # 設定項目
-        self.folder_entry.grid(myrules.grid_param["center"],row=1)
-        self.cpid_entry.grid(myrules.grid_param["center"],row=3)
-        self.description_entry.grid(myrules.grid_param["center"],row=4)
-        self.sent_type_combo.grid(myrules.grid_param["center"],row=5)
-        self.reward_type_combo.grid(myrules.grid_param["center"],row=6)
-        self.main_func.grid(myrules.grid_param["center"],row=9)
+        self.folder_entry.grid(common.grid_param["center"],row=1)
+        self.cpid_entry.grid(common.grid_param["center"],row=3)
+        self.description_entry.grid(common.grid_param["center"],row=4)
+        self.sent_type_combo.grid(common.grid_param["center"],row=5)
+        self.reward_type_combo.grid(common.grid_param["center"],row=6)
+        self.main_func.grid(common.grid_param["center"],row=9)
 
     def selected_dirpath(self):
         dirpath: str = myfunc.read_folders()
@@ -71,7 +73,7 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
 
         ## 配信種別がManual／Voucherによって特典種別の値を切り替える
         selected = self.sent_type_combo.get()
-        self.reward_type_combo['values'] = myrules.reward_type_option[selected]
+        self.reward_type_combo['values'] = common.reward_type_option[selected]
         self.reward_type_combo.set('')  # 初期値をリセット
 
     def switching_entry(self,event):
@@ -85,58 +87,66 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
             self.valid_bikou.grid_forget()
         else:
             ## 表示
-            self.valid_lb.grid(myrules.grid_param["left"],row=7)
-            self.valid_entry.grid(myrules.grid_param["center"],row=7)
-            self.valid_bikou.grid(myrules.grid_param["right"],row=7)
+            self.valid_lb.grid(common.grid_param["left"],row=7)
+            self.valid_entry.grid(common.grid_param["center"],row=7)
+            self.valid_bikou.grid(common.grid_param["right"],row=7)
     
-    def setting_rule(self,formats):
+    def setting_rule(self,prm):
         
-        formats['target'] = target
-        formats['src_path'] = self.folder_entry.get()
-        formats['date_6'] = datetime.date.today().strftime('%y%m%d')
-
-        type1 = self.sent_type_combo.get()
-        type2 = self.reward_type_combo.get()
-        str = type1 + "@" + type2
-        formats['columns'] = myrules.format_col[str]
-        formats['campaign_id'] = self.cpid_entry.get() + '_' + formats['date_6']
-        formats['rewardname_description'] = self.description_entry.get()
-        formats['sent_type'] = self.sent_type_combo.get()
-        formats['reward_type'] = self.reward_type_combo.get()
-        formats['useby_date'] = self.valid_entry.get()
-        formats['dest_path'] = formats['dest_path'] + formats['campaign_id'] + formats['dirname']
-        formats['dest_file'] = formats['prefix'] + formats['campaign_id'] + '.csv'
+        # 入力したパラメータ値を取得
+        prm['mode'] = self.sent_type_combo.get() + "@" + self.reward_type_combo.get()
+        prm['campaign_id'] = self.cpid_entry.get()
+        prm['rewardname_description'] = self.description_entry.get()
+        prm['sent_type'] = self.sent_type_combo.get()
+        prm['reward_type'] = self.reward_type_combo.get()
+        prm['useby_date'] = self.valid_entry.get()
         
-    
     def main(self):
 
         ### メインの処理 ###
         # 01 元ファイルの読み込み
-        fpath = self.folder_entry.get()
-        rewards = myfunc.read_files(fpath)
-
-        # 02 特典の作成定義を設定
-        formats = myrules.default_rule
-        self.setting_rule(formats)
-
-        # 03 出力用ファイルの宣言
-        df = pd.DataFrame(columns=formats["columns"])
-
-        # 04 データの移行
-        for file in rewards:
-            
-            df_src = pd.read_csv(os.path.join(fpath,file), sep=',', encoding="UTF-8")
-            myfunc.set_param(formats,df_src)
-
-            for col_name in df.columns:
-                strValue = formats['target'] + ':' + col_name
-                df[col_name] = myfunc.move_data(strValue,df_src)
+        self.setting_rule(prm)
+        myfunc.create_base_path(prm)
         
-        # 05 データのシャッフル
-        df = myfunc.shuffle_date(df)
+        # DeliveryPromocodeの作成開始を宣言
+        myfunc.output_log(prm,1,"Delivery_promocodes作成開始")
+        
+        # 指定したフォルダから元ファイルを読み込み
+        rewards = myfunc.read_files(prm,self.folder_entry.get())
+        myfunc.output_log(prm,1,f"特典の元ファイル読み込み完了：{rewards}")
 
-        # 06 データのエクスポート
-        myfunc.export_data(formats,df)
+        try:
+            # 03 データの移行
+            for file in rewards:
+                
+                # dataframeの初期化
+                df = pd.DataFrame(columns=myrules.default_coloms[prm['mode']])
+                myfunc.output_log(prm,1,f"特典出力時のカラムセット完了：{df.columns}")
+
+                # 元ファイルを1ファイルずつdataframeへ格納
+                df_src = pd.read_csv(os.path.join(self.folder_entry.get(),file), sep=',', encoding="UTF-8")
+                myfunc.set_param(prm,df_src)
+
+                myfunc.output_log(prm,1,f"データ移行開始／移行元ファイル名：{file}")
+                for col_name in df.columns:
+                    strValue = prm['target'] + ':' + col_name
+                    df[col_name] = myfunc.move_data(prm,strValue,df_src)
+            
+                # 05 データのシャッフル
+                df = myfunc.shuffle_date(prm,df)
+                myfunc.output_log(prm,1,f"特典のシャッフル完了")
+
+                # 06 データのエクスポート
+                myfunc.export_data(prm,df,os.path.splitext(file)[0])
+
+            messagebox.showinfo('メッセージ', '特典作成が完了しました。') 
+
+        except Exception as e:
+            messagebox.showinfo('メッセージ', '特典作成中にエラーが発生しました。') 
+            myfunc.output_log(prm,3,f"予期せぬエラーが発生しました。")
+            myfunc.output_log(prm,3,f"エラークラス：{e.__class__.__name__}／エラー内容：{e.args[0]}／詳細：{e}")
+        finally:
+            myfunc.output_log(prm,1,"処理完了")
         
 
 
