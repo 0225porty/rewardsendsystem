@@ -21,6 +21,7 @@ env_setting = {
         ,"env_path":"{base}/etc/env_settings.py"
         ,"setting_path":"{base}/etc/settings.py"
         ,"mapping_path":"{base}/etc/mapping.ini"
+        ,"edit_path":"{base}/etc/edit.ini"
         ,"module_path":"{base}/lib/data_process.py"
         ,"export_path":"D:/work/python/{campaign_id}/"
         ,"upload_path":"D:/work/python/{campaign_id}/upload/"
@@ -30,4 +31,10 @@ env_setting = {
         ,"log_name":None
         ,"sheet_name":"log"
     }
+}
+
+# ログファイル名の定義
+log_files = {
+    "Manual@プロモコード":"チェックファイル_M_#10.xlsx"
+    ,"Manual@他社特典／デジタルコード":"チェックファイル_M_#11.xlsx"
 }

@@ -12,12 +12,14 @@ import inspect
 
 myEnv = common.env_setting[os.path.basename(__main__.__file__)]
 mapping = configparser.ConfigParser()
+edit = configparser.ConfigParser()
 mapping.read(str(myEnv['mapping_path']).replace("{base}",os.path.dirname(__main__.__file__)))
+edit.read(str(myEnv['edit_path']).replace("{base}",os.path.dirname(__main__.__file__)))
 
 def create_base_path(param):
     
     # log出力先ファイルを取得
-    myEnv['log_name'] = "チェックファイル_M_#10.xlsx"
+    myEnv['log_name'] = common.log_files[param['mode']]
     wb = openpyxl.load_workbook(os.path.join(str(myEnv['log_path']).replace("{base}",os.path.dirname(__main__.__file__)),str(myEnv['log_name'])))
     
     base_path = str(myEnv['export_path']).replace("{campaign_id}",str(param['campaign_id']))
@@ -25,7 +27,8 @@ def create_base_path(param):
         os.makedirs(base_path)
     
     # log出力先ファイルをコピー
-    wb.save(os.path.join(base_path,str(myEnv['log_name'])))
+    myEnv['log_name'] = str(myEnv['log_name']).replace(".xlsx",f"_{dt.now().strftime('%Y%m%d%H%M%S')}.xlsx")
+    wb.save(os.path.join(base_path,myEnv['log_name']))
 
 def output_log(param,level,msg):
 
@@ -63,11 +66,21 @@ def read_files(formats,path):
     output_log(formats,1,f"ファイル読み込み開始：{path}")
 
     # 指定したフォルダ直下に存在するファイル名をすべて取得
-    return [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))]
+    files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path,f))]
+    output_log(formats,1,f"ファイル読み込み完了：{files}")
+    
+    return files
 
 def set_param(formats,df:pd):
     
     output_log(formats,1,f"パラメータ設定開始")
+    
+    if str(formats['mode']).split('@')[1] != 'プロモコード':
+        col_cnt = df.shape[1]
+        new_col = ['column' + str(i) for i in range(col_cnt)]
+        df.columns = new_col
+        output_log(formats,1,f"元データのカラム名変更：{new_col}")
+
     if formats['campaign_id'] != "":
         df['campaign_id'] = formats['campaign_id']
         output_log(formats,1,f"キャンペーンID設定完了：{formats['campaign_id']}")
@@ -78,28 +91,69 @@ def set_param(formats,df:pd):
         df['useby_date'] = formats['useby_date']
         output_log(formats,1,f"特典有効期限の設定完了：{formats['useby_date']}")
     
+    output_log(formats,1,f"パラメータ設定完了")
+    
 def move_data(formats,mapping_rule,df:pd):
 
+    output_log(formats,1,f"データ移行開始")
+    
     # [mapping.ini]の設定に従って、データを移行
     if(not(mapping.has_section(mapping_rule))):
-        output_log(formats,1,f"「mapping.ini」にセクション名なし：{mapping_rule}")
+        output_log(formats,2,f"「mapping.ini」にセクション名なし：{mapping_rule}")
         return
-    
     output_log(formats,1,f"セクション名：{mapping_rule}")
+    
     src_col=mapping[mapping_rule]['src']
     format=mapping[mapping_rule]['format']
     dtype=mapping[mapping_rule]['dtype']
     output_log(formats,1,f"移行元カラム：{src_col}／データ型：{dtype}／データ形式：{format}")
 
     if(dtype=='str'):
-        return df[src_col]
+        df_dest = df[src_col]
     elif(dtype=='datetime'):
-        return [s.strftime(format) for s in pd.to_datetime(df[src_col])]
+        df_dest = [s.strftime(format) for s in pd.to_datetime(df[src_col])]
+    
+    output_log(formats,1,f"データ移行完了")
+    return df_dest
+
+def format_data(formats,edit_rule,df:pd):
+
+    output_log(formats,1,f"データの編集開始")
+    
+    # [edit.ini]に該当セクションがあるかを確認
+    if edit.has_section(edit_rule):
+        
+        output_log(formats,1,f"セクション名：{edit_rule}")        
+        
+        colname=edit[edit_rule]['col']
+        add=edit[edit_rule]['add']
+        substi=pd.DataFrame(data=eval(edit[edit_rule]['substi']))
+        output_log(formats,1,f"対象カラム名：{colname}／追加文字：{add}／置換文字：{substi}")
+    
+        if add != 'none':
+            pass
+            output_log(formats,1,f"文字列の追加完了　対象カラム名:{colname}／追加文字:{add}")
+
+        if not(substi.empty):
+            for d in substi.values:
+                df = [str(strdf).replace(d[0],d[1]) for strdf in df]
+                output_log(formats,1,f"文字列の置換完了　対象カラム名：{colname}／置換文字:{d[0]} → {d[1]}")
+    else:
+        output_log(formats,2,f"「edit.ini」にセクション名なし：{edit_rule}")
+
+
+    df = [d.strip() for d in df]
+    output_log(formats,1,f"データの空行、改行の除去完了")
+    
+    output_log(formats,1,f"データの編集完了")
+    return df
 
 def shuffle_date(formats,df:pd):
     
     output_log(formats,1,f"特典のシャッフル開始")
-    return df.sample(frac=1,ignore_index=True)
+    df = df.sample(frac=1,ignore_index=True)
+    output_log(formats,1,f"特典のシャッフル完了")
+    return df
 
 def export_data(formats,df:pd,filename):
     
@@ -111,9 +165,11 @@ def export_data(formats,df:pd,filename):
     
     if not(os.path.isdir(src_dir)):
         os.makedirs(src_dir)
+        output_log(formats,1,f"元データ保存先のパス作成{src_dir}")
 
     if not(os.path.isdir(upload_dir)):
         os.makedirs(upload_dir)
+        output_log(formats,1,f"出力先のパス作成{upload_dir}")
 
     # csv形式で出力する
     # 出力形式は「UTF-8」、ダブルクォートは最小限

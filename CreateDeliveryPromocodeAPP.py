@@ -10,7 +10,6 @@ from tkinter import ttk
 from etc import common
 from tkinter import messagebox
 
-myEnv = common.env_setting[os.path.basename(__file__)]
 prm = myrules.params[os.path.basename(__file__)]
 
 class CreateDeliveryPromocodeAPP(tk.Frame):
@@ -90,6 +89,8 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
             self.valid_lb.grid(common.grid_param["left"],row=7)
             self.valid_entry.grid(common.grid_param["center"],row=7)
             self.valid_bikou.grid(common.grid_param["right"],row=7)
+            self.valid_entry.delete(0,tk.END)
+            self.valid_entry.insert(0,f"{datetime.date.today().strftime('%Y-%m-%d')}")
     
     def setting_rule(self,prm):
         
@@ -113,15 +114,13 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
         
         # 指定したフォルダから元ファイルを読み込み
         rewards = myfunc.read_files(prm,self.folder_entry.get())
-        myfunc.output_log(prm,1,f"特典の元ファイル読み込み完了：{rewards}")
 
         try:
-            # 03 データの移行
             for file in rewards:
                 
                 # dataframeの初期化
                 df = pd.DataFrame(columns=myrules.default_coloms[prm['mode']])
-                myfunc.output_log(prm,1,f"特典出力時のカラムセット完了：{df.columns}")
+                myfunc.output_log(prm,1,f"データフレーム初期化完了／カラム名：{df.columns}")
 
                 # 元ファイルを1ファイルずつdataframeへ格納
                 df_src = pd.read_csv(os.path.join(self.folder_entry.get(),file), sep=',', encoding="UTF-8")
@@ -130,18 +129,24 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
                 myfunc.output_log(prm,1,f"データ移行開始／移行元ファイル名：{file}")
                 for col_name in df.columns:
                     strValue = prm['target'] + ':' + col_name
-                    df[col_name] = myfunc.move_data(prm,strValue,df_src)
-            
-                # 05 データのシャッフル
-                df = myfunc.shuffle_date(prm,df)
-                myfunc.output_log(prm,1,f"特典のシャッフル完了")
 
-                # 06 データのエクスポート
+                    # データ移行
+                    df[col_name] = myfunc.move_data(prm,strValue,df_src)
+
+                    # データの編集
+                    df[col_name] = myfunc.format_data(prm,strValue,df[col_name])
+
+
+                # データのシャッフル
+                df = myfunc.shuffle_date(prm,df)
+                
+                # データのエクスポート
                 myfunc.export_data(prm,df,os.path.splitext(file)[0])
 
             messagebox.showinfo('メッセージ', '特典作成が完了しました。') 
 
         except Exception as e:
+
             messagebox.showinfo('メッセージ', '特典作成中にエラーが発生しました。') 
             myfunc.output_log(prm,3,f"予期せぬエラーが発生しました。")
             myfunc.output_log(prm,3,f"エラークラス：{e.__class__.__name__}／エラー内容：{e.args[0]}／詳細：{e}")

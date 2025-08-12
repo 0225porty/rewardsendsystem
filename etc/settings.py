@@ -33,4 +33,5 @@ params = {
 default_coloms = {
     "Manual@プロモコード":['campaign_flg','rewardname','rewardname_description','useby_date']
     ,"Voucher@プロモコード":['campaign_flg','promocode']
+    ,"Manual@他社特典／デジタルコード":['campaign_flg','rewardname','rewardname_description','useby_date']
 }
