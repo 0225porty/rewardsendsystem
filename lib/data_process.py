@@ -1,7 +1,7 @@
+import __main__
 import configparser
 import pandas as pd
 import csv
-import __main__
 from tkinter import filedialog
 import os
 from datetime import datetime as dt
@@ -116,7 +116,7 @@ def move_data(formats,mapping_rule,df:pd):
     output_log(formats,1,f"データ移行完了")
     return df_dest
 
-def format_data(formats,edit_rule,df:pd):
+def format_data(formats,edit_rule,df:pd.DataFrame):
 
     output_log(formats,1,f"データの編集開始")
     
@@ -141,9 +141,18 @@ def format_data(formats,edit_rule,df:pd):
     else:
         output_log(formats,2,f"「edit.ini」にセクション名なし：{edit_rule}")
 
+    
+    # for r in range(df.shape[0]):
+    #     for c in range(df.shape[1]):
+    #         if df.columns[c] == 'MaxLimit' and df.columns[c]:
+    #             df[r][c] = df[r][c]
+    
+    # output_log(formats,1,f"特典名の利用回数の追記完了")
 
-    df = [d.strip() for d in df]
-    output_log(formats,1,f"データの空行、改行の除去完了")
+    print(df)
+    # データフレーム内の全値の（先頭・末尾）の空白を削除
+    df = pd.DataFrame([df.loc[i].str.strip() for i in range(df.shape[0])])
+    output_log(formats,1,f"全データの先頭・末尾の空白削除完了")
     
     output_log(formats,1,f"データの編集完了")
     return df

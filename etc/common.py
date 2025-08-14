@@ -16,7 +16,7 @@ reward_type_option = {
 env_setting = {
     
     # 共通の設定
-    "CreateDeliveryPromocodeAPP.py":{
+    "CreateDeliveryPromocodeAPP.pyw":{
         "target":"promocode"
         ,"env_path":"{base}/etc/env_settings.py"
         ,"setting_path":"{base}/etc/settings.py"
