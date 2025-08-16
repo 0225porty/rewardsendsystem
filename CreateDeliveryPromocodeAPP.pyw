@@ -47,17 +47,17 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
         self.folder_lb.grid(common.grid_param["left"],row=1)
         self.folder_button.grid(common.grid_param["right"],row=1)
         self.tilte_lb_02.grid(common.grid_param["title"],row=2)
-        self.cpid_lb.grid(common.grid_param["left"],row=3)
-        self.description_lb.grid(common.grid_param["left"],row=4)
-        self.sent_type_lb.grid(common.grid_param["left"],row=5)
-        self.reward_type_lb.grid(common.grid_param["left"],row=6)
+        self.sent_type_lb.grid(common.grid_param["left"],row=3)
+        self.reward_type_lb.grid(common.grid_param["left"],row=4)
+        self.cpid_lb.grid(common.grid_param["left"],row=5)
+        self.description_lb.grid(common.grid_param["left"],row=6)
         
         # 設定項目
         self.folder_entry.grid(common.grid_param["center"],row=1)
-        self.cpid_entry.grid(common.grid_param["center"],row=3)
-        self.description_entry.grid(common.grid_param["center"],row=4)
-        self.sent_type_combo.grid(common.grid_param["center"],row=5)
-        self.reward_type_combo.grid(common.grid_param["center"],row=6)
+        self.sent_type_combo.grid(common.grid_param["center"],row=3)
+        self.reward_type_combo.grid(common.grid_param["center"],row=4)
+        self.cpid_entry.grid(common.grid_param["center"],row=5)
+        self.description_entry.grid(common.grid_param["center"],row=6)
         self.main_func.grid(common.grid_param["center"],row=9)
 
     def selected_dirpath(self):
@@ -75,6 +75,17 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
         self.reward_type_combo['values'] = common.reward_type_option[selected]
         self.reward_type_combo.set('')  # 初期値をリセット
 
+        if selected == 'Manual':
+            self.cpid_lb.grid(common.grid_param["left"],row=5)
+            self.cpid_entry.grid(common.grid_param["center"],row=5)
+            self.description_lb.grid(common.grid_param["left"],row=6)
+            self.description_entry.grid(common.grid_param["center"],row=6)
+        else:
+            self.cpid_lb.grid_forget()
+            self.cpid_entry.grid_forget()
+            self.description_lb.grid_forget()
+            self.description_entry.grid_forget()
+        
     def switching_entry(self,event):
 
         ## 有効期限が不要な特典種別の場合に、入力項目の表示／非表示を切り替える
@@ -118,15 +129,16 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
         try:
             for file in rewards:
                 
+                #元ファイルを「src」にコピーする
+
                 # dataframeの初期化
                 df = pd.DataFrame(columns=myrules.default_coloms[prm['mode']])
                 myfunc.output_log(prm,1,f"データフレーム初期化完了／カラム名：{df.columns}")
 
                 # 元ファイルを1ファイルずつdataframeへ格納
                 df_src = pd.read_csv(os.path.join(self.folder_entry.get(),file), sep=',', encoding="UTF-8")
-                myfunc.set_param(prm,df_src)
+                myfunc.set_params(prm,df_src)
 
-                myfunc.output_log(prm,1,f"データ移行開始／移行元ファイル名：{file}")
                 for col_name in df.columns:
                     strValue = prm['target'] + ':' + col_name
 
@@ -134,14 +146,16 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
                     df[col_name] = myfunc.move_data(prm,strValue,df_src)
 
                 # データの編集
+                myfunc.output_log(prm,1,f"データ編集開始")
                 df = myfunc.format_data(prm,strValue,df)
 
-
                 # データのシャッフル
+                myfunc.output_log(prm,1,f"データシャッフル開始")
                 df = myfunc.shuffle_date(prm,df)
                 
                 # データのエクスポート
-                myfunc.export_data(prm,df,os.path.splitext(file)[0])
+                myfunc.output_log(prm,1,f"csv出力開始")
+                myfunc.export_data(prm,df,file)
 
             messagebox.showinfo('メッセージ', '特典作成が完了しました。') 
 
