@@ -23,7 +23,7 @@ env_setting = {
         ,"mapping_path":"{base}/etc/mapping.ini"
         ,"edit_path":"{base}/etc/edit.ini"
         ,"module_path":"{base}/lib/data_process.py"
-        ,"export_path":"D:/work/python/{campaign_id}_{date_6}/"
+        ,"export_path":"D:/work/python/{campaign_flg}/"
         ,"upload_path":"{export_path}upload/"
         ,"src_path":"{export_path}src/"
         ,"export_file":"No.8_{filename}.csv"

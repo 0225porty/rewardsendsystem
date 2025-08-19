@@ -20,7 +20,7 @@ edit.read(str(myEnv['edit_path']).replace("{base}",os.path.dirname(__main__.__fi
 def create_base_path(params):
     
     # 出力先のフォルダを指定
-    myEnv['export_path'] = str(myEnv['export_path']).replace("{campaign_id}",str(params['campaign_id'])).replace("{date_6}",dt.date.today().strftime('%y%m%d'))
+    myEnv['export_path'] = str(myEnv['export_path']).replace("{campaign_flg}",str(params['campaign_flg']))
     myEnv['src_path'] = str(myEnv['src_path']).replace("{export_path}",myEnv['export_path'])
     myEnv['upload_path'] = str(myEnv['upload_path']).replace("{export_path}",myEnv['export_path'])
     
@@ -51,7 +51,6 @@ def create_base_path(params):
 
 def output_log(params,level,msg):
 
-    # base_path = str(myEnv['export_path']).replace("{campaign_id}",str(params['campaign_id']))
     wb = openpyxl.load_workbook(os.path.join(myEnv['export_path'],str(myEnv['log_name'])))
     ws = wb[str(myEnv['sheet_name'])]
     
@@ -109,10 +108,11 @@ def set_params(params,df:pd):
 
     if params['campaign_id'] != "":
         df['campaign_id'] = params['campaign_id']
+        df['campaign_flg'] = params['campaign_flg']
         output_log(params,1,f"キャンペーンID設定完了：{params['campaign_id']}")
-    if params['rewardname_description'] != "":
-        df['rewardname_description'] = params['rewardname_description']
-        output_log(params,1,f"特典説明の設定完了：{params['rewardname_description']}")
+    if params['Rewardname_Description'] != "":
+        df['Rewardname_Description'] = params['Rewardname_Description']
+        output_log(params,1,f"特典説明の設定完了：{params['Rewardname_Description']}")
     if params['useby_date'] != "":
         df['useby_date'] = params['useby_date']
         output_log(params,1,f"特典有効期限の設定完了：{params['useby_date']}")
@@ -162,7 +162,7 @@ def format_data(params,edit_rule,df:pd.DataFrame):
 
     # 特典に回数分の文字を付加する + 「benefit for:」の文字を削除
     output_log(params,2,f"特典名に回数分の文字を付加")
-    df['rewardname'] = add_maxlimit(params,df)
+    df['RewardName'] = add_maxlimit(params,df)
     
     output_log(params,1,f"{format_data.__name__}[end]")
     return df
@@ -192,9 +192,9 @@ def add_maxlimit(params,df:pd.DataFrame):
         update_name = []
         max_limit = pd.to_numeric(row['MaxLimit'])
         if max_limit > 1:
-            update_name = str(row['rewardname']).replace("benefit for [","").replace("]","") + str(max_limit) + "回分"
+            update_name = str(row['RewardName']).replace("Reward for benefits  :[","").replace("]","") + str(max_limit) + "回分"
         else:
-            update_name = str(row['rewardname']).replace("benefit for [","").replace("]","")
+            update_name = str(row['RewardName']).replace("Reward for benefits  :[","").replace("]","")
         update_names.append(update_name)
 
     return pd.DataFrame(update_names)

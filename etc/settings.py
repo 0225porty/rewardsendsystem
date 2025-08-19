@@ -4,7 +4,8 @@ params = {
         "mode":None
         ,"target":"promocode"
         ,"campaign_id":None
-        ,"rewardname_description":None
+        ,"campaign_flg":None
+        ,"Rewardname_Description":None
         ,"sent_type":None
         ,"reward_type":None
         ,"useby_date":None
@@ -13,7 +14,7 @@ params = {
 
 # カラム名の定義
 default_coloms = {
-    "Manual@プロモコード":['campaign_flg','rewardname','rewardname_description','PortInOnly','MaxLimit','useby_date']
+    "Manual@プロモコード":['campaign_flg','RewardName','Rewardname_Description','PortInOnly','MaxLimit','useby_date']
     ,"Voucher@プロモコード":['campaign_flg','promocode']
-    ,"Manual@他社特典／デジタルコード":['campaign_flg','rewardname','rewardname_description','useby_date']
+    ,"Manual@他社特典／デジタルコード":['campaign_flg','RewardName','Rewardname_Description','useby_date']
 }

@@ -10,7 +10,7 @@ from tkinter import ttk
 from etc import common
 from tkinter import messagebox
 
-prm = myrules.params[os.path.basename(__file__)]
+params = myrules.params[os.path.basename(__file__)]
 
 class CreateDeliveryPromocodeAPP(tk.Frame):
     def __init__(self,master):
@@ -103,28 +103,29 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
             self.valid_entry.delete(0,tk.END)
             self.valid_entry.insert(0,f"{datetime.date.today().strftime('%Y-%m-%d')}")
     
-    def setting_rule(self,prm):
+    def setting_rule(self,params):
         
         # 入力したパラメータ値を取得
-        prm['mode'] = self.sent_type_combo.get() + "@" + self.reward_type_combo.get()
-        prm['campaign_id'] = self.cpid_entry.get()
-        prm['rewardname_description'] = self.description_entry.get()
-        prm['sent_type'] = self.sent_type_combo.get()
-        prm['reward_type'] = self.reward_type_combo.get()
-        prm['useby_date'] = self.valid_entry.get()
+        params['mode'] = self.sent_type_combo.get() + "@" + self.reward_type_combo.get()
+        params['campaign_id'] = self.cpid_entry.get()
+        params['campaign_flg'] = params['campaign_id'] + '_' + str(datetime.date.today().strftime('%y%m%d'))
+        params['Rewardname_Description'] = self.description_entry.get()
+        params['sent_type'] = self.sent_type_combo.get()
+        params['reward_type'] = self.reward_type_combo.get()
+        params['useby_date'] = self.valid_entry.get()
         
     def main(self):
 
         ### メインの処理 ###
         # 01 元ファイルの読み込み
-        self.setting_rule(prm)
-        myfunc.create_base_path(prm)
+        self.setting_rule(params)
+        myfunc.create_base_path(params)
         
         # DeliveryPromocodeの作成開始を宣言
-        myfunc.output_log(prm,1,"Delivery_promocodes作成開始")
+        myfunc.output_log(params,1,"Delivery_promocodes作成開始")
         
         # 指定したフォルダから元ファイルを読み込み
-        rewards = myfunc.read_files(prm,self.folder_entry.get())
+        rewards = myfunc.read_files(params,self.folder_entry.get())
 
         try:
             for file in rewards:
@@ -132,40 +133,40 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
                 #元ファイルを「src」にコピーする
 
                 # dataframeの初期化
-                df = pd.DataFrame(columns=myrules.default_coloms[prm['mode']])
-                myfunc.output_log(prm,1,f"データフレーム初期化完了／カラム名：{df.columns}")
+                df = pd.DataFrame(columns=myrules.default_coloms[params['mode']])
+                myfunc.output_log(params,1,f"データフレーム初期化完了／カラム名：{df.columns}")
 
                 # 元ファイルを1ファイルずつdataframeへ格納
                 df_src = pd.read_csv(os.path.join(self.folder_entry.get(),file), sep=',', encoding="UTF-8")
-                myfunc.set_params(prm,df_src)
+                myfunc.set_params(params,df_src)
 
                 for col_name in df.columns:
-                    strValue = prm['target'] + ':' + col_name
+                    strValue = params['target'] + ':' + col_name
 
                     # データ移行
-                    df[col_name] = myfunc.move_data(prm,strValue,df_src)
+                    df[col_name] = myfunc.move_data(params,strValue,df_src)
 
                 # データの編集
-                myfunc.output_log(prm,1,f"データ編集開始")
-                df = myfunc.format_data(prm,strValue,df)
+                myfunc.output_log(params,1,f"データ編集開始")
+                df = myfunc.format_data(params,strValue,df)
 
                 # データのシャッフル
-                myfunc.output_log(prm,1,f"データシャッフル開始")
-                df = myfunc.shuffle_date(prm,df)
+                myfunc.output_log(params,1,f"データシャッフル開始")
+                df = myfunc.shuffle_date(params,df)
                 
                 # データのエクスポート
-                myfunc.output_log(prm,1,f"csv出力開始")
-                myfunc.export_data(prm,df,file)
+                myfunc.output_log(params,1,f"csv出力開始")
+                myfunc.export_data(params,df,file)
 
             messagebox.showinfo('メッセージ', '特典作成が完了しました。') 
 
         except Exception as e:
 
             messagebox.showinfo('メッセージ', '特典作成中にエラーが発生しました。') 
-            myfunc.output_log(prm,3,f"予期せぬエラーが発生しました。")
-            myfunc.output_log(prm,3,f"エラークラス：{e.__class__.__name__}／エラー内容：{e.args[0]}／詳細：{e}")
+            myfunc.output_log(params,3,f"予期せぬエラーが発生しました。")
+            myfunc.output_log(params,3,f"エラークラス：{e.__class__.__name__}／エラー内容：{e.args[0]}／詳細：{e}")
         finally:
-            myfunc.output_log(prm,1,"処理完了")
+            myfunc.output_log(params,1,"処理完了")
         
 
 
