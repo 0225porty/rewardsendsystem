@@ -44,6 +44,7 @@ def create_base_path(params):
     # log出力先ファイルをファイル名=変換して、出力先ベースパスへコピー
     myEnv['log_name'] = str(log_name).replace(".xlsx",f"_{dt.datetime.now().strftime('%Y%m%d%H%M%S')}.xlsx")
     wb.save(os.path.join(myEnv['export_path'],myEnv['log_name']))
+    output_log(params,0,f"[start]")
     output_log(params,1,f"logファイル作成　出力先ベースパス：{myEnv['export_path']}　logファイル名：{myEnv['log_name']}")
     output_log(params,1,f"出力先のベースパス作成：{myEnv['export_path']}")
     output_log(params,1,f"「src」パスの作成：{myEnv['src_path']}")
@@ -55,7 +56,10 @@ def output_log(params,level,msg):
     ws = wb[str(myEnv['sheet_name'])]
     
     last_row = ws.max_row   # 最終行を取得
-    if level == 1:
+    if level == 0:
+        ws.cell(row=2,column=3).value = params['campaign_id']
+        ws.cell(row=3,column=3).value = dt.datetime.now()
+    elif level == 1:
         ws.cell(row=last_row+1,column=2).value = "情報"
         ws.cell(row=last_row+1,column=3).value = f"{inspect.stack()[1].function}:{inspect.stack()[1].lineno}"
         ws.cell(row=last_row+1,column=4).value = msg
@@ -192,9 +196,9 @@ def add_maxlimit(params,df:pd.DataFrame):
         update_name = []
         max_limit = pd.to_numeric(row['MaxLimit'])
         if max_limit > 1:
-            update_name = str(row['RewardName']).replace("Reward for benefits  :[","").replace("]","") + str(max_limit) + "回分"
+            update_name = str(row['RewardName']).replace("Reward for benefits:  [","").replace("]","") + str(max_limit) + "回分"
         else:
-            update_name = str(row['RewardName']).replace("Reward for benefits  :[","").replace("]","")
+            update_name = str(row['RewardName']).replace("Reward for benefits:  [","").replace("]","")
         update_names.append(update_name)
 
     return pd.DataFrame(update_names)

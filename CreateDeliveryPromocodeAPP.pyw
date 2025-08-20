@@ -1,4 +1,3 @@
-import configparser
 import pandas as pd
 import etc.settings as myrules
 import lib.data_process as myfunc
@@ -76,13 +75,9 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
         self.reward_type_combo.set('')  # 初期値をリセット
 
         if selected == 'Manual':
-            self.cpid_lb.grid(common.grid_param["left"],row=5)
-            self.cpid_entry.grid(common.grid_param["center"],row=5)
             self.description_lb.grid(common.grid_param["left"],row=6)
             self.description_entry.grid(common.grid_param["center"],row=6)
         else:
-            self.cpid_lb.grid_forget()
-            self.cpid_entry.grid_forget()
             self.description_lb.grid_forget()
             self.description_entry.grid_forget()
         
