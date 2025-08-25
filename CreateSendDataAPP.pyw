@@ -11,27 +11,27 @@ from tkinter import messagebox
 
 params = myrules.params[os.path.basename(__file__)]
 
-class CreateDeliveryPromocodeAPP(tk.Frame):
+class CreateSendDataAPP(tk.Frame):
     def __init__(self,master):
         super().__init__(master)
         master.geometry("600x400")
-        master.title("Delivery_promocodes作成ツール")
+        master.title("RSH／SendList作成ツール")
         s = ttk.Style()
         s.theme_use('default')
 
         # GUI画面の各項目
-        self.tilte_lb_01 = tk.Label(master,text="■特典が保存されているフォルダを選択してください。")
+        self.tilte_lb_01 = tk.Label(master,text="■データ作成用クエリ（#10）を指定してください。")
         self.tilte_lb_02 = tk.Label(master,text="■パラメータを指定してください。")
-        self.folder_lb = tk.Label(master,text="対象パス")
+        self.folder_lb = tk.Label(master,text="データ作成用クエリ（#10）")
         self.folder_entry = tk.Entry(master,width=40,state='readonly')
         self.folder_button = tk.Button(master,text="参照",command=self.selected_dirpath)
-        self.cpid_lb = tk.Label(master,text="キャンペーンID")
+        self.cpid_lb = tk.Label(master,text="キャンペーン名")
         self.cpid_entry = tk.Entry(master,width=40)
-        self.description_lb = tk.Label(master,text="特典の説明")
-        self.description_entry = tk.Entry(master,width=40)
-        self.valid_lb = tk.Label(master,text="有効期限")
-        self.valid_bikou = tk.Label(master,text="(形式：YYYY-MM-DD)")
-        self.valid_entry = tk.Entry(master,width=40)
+        # self.description_lb = tk.Label(master,text="特典の説明")
+        # self.description_entry = tk.Entry(master,width=40)
+        # self.valid_lb = tk.Label(master,text="有効期限")
+        # self.valid_bikou = tk.Label(master,text="(形式：YYYY-MM-DD)")
+        # self.valid_entry = tk.Entry(master,width=40)
         self.sent_type_lb = tk.Label(master,text="配信種別")
         self.sent_type_combo = ttk.Combobox(master,values=common.sent_type_option,textvariable=tk.StringVar,width=38,state="readonly")
         self.sent_type_combo.bind("<<ComboboxSelected>>",self.update_combo_reward_type)
@@ -49,14 +49,14 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
         self.sent_type_lb.grid(common.grid_param["left"],row=3)
         self.reward_type_lb.grid(common.grid_param["left"],row=4)
         self.cpid_lb.grid(common.grid_param["left"],row=5)
-        self.description_lb.grid(common.grid_param["left"],row=6)
+        # self.description_lb.grid(common.grid_param["left"],row=6)
         
         # 設定項目
         self.folder_entry.grid(common.grid_param["center"],row=1)
         self.sent_type_combo.grid(common.grid_param["center"],row=3)
         self.reward_type_combo.grid(common.grid_param["center"],row=4)
         self.cpid_entry.grid(common.grid_param["center"],row=5)
-        self.description_entry.grid(common.grid_param["center"],row=6)
+        # self.description_entry.grid(common.grid_param["center"],row=6)
         self.main_func.grid(common.grid_param["center"],row=9)
 
     def selected_dirpath(self):
@@ -74,29 +74,29 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
         self.reward_type_combo['values'] = common.reward_type_option[selected]
         self.reward_type_combo.set('')  # 初期値をリセット
 
-        if selected == 'Manual':
-            self.description_lb.grid(common.grid_param["left"],row=6)
-            self.description_entry.grid(common.grid_param["center"],row=6)
-        else:
-            self.description_lb.grid_forget()
-            self.description_entry.grid_forget()
+        # if selected == 'Manual':
+        #     self.description_lb.grid(common.grid_param["left"],row=6)
+        #     self.description_entry.grid(common.grid_param["center"],row=6)
+        # else:
+        #     self.description_lb.grid_forget()
+        #     self.description_entry.grid_forget()
         
     def switching_entry(self,event):
 
         ## 有効期限が不要な特典種別の場合に、入力項目の表示／非表示を切り替える
         selected = self.reward_type_combo.get()
-        if selected == 'プロモコード' or selected == 'リマインド配信' or selected == 'auPAY残高還元':
-            ## 非表示
-            self.valid_lb.grid_forget()
-            self.valid_entry.grid_forget()
-            self.valid_bikou.grid_forget()
-        else:
-            ## 表示
-            self.valid_lb.grid(common.grid_param["left"],row=7)
-            self.valid_entry.grid(common.grid_param["center"],row=7)
-            self.valid_bikou.grid(common.grid_param["right"],row=7)
-            self.valid_entry.delete(0,tk.END)
-            self.valid_entry.insert(0,f"{datetime.date.today().strftime('%Y-%m-%d')}")
+        # if selected == 'プロモコード' or selected == 'リマインド配信' or selected == 'auPAY残高還元':
+        #     ## 非表示
+        #     self.valid_lb.grid_forget()
+        #     self.valid_entry.grid_forget()
+        #     self.valid_bikou.grid_forget()
+        # else:
+        #     ## 表示
+        #     self.valid_lb.grid(common.grid_param["left"],row=7)
+        #     self.valid_entry.grid(common.grid_param["center"],row=7)
+        #     self.valid_bikou.grid(common.grid_param["right"],row=7)
+        #     self.valid_entry.delete(0,tk.END)
+        #     self.valid_entry.insert(0,f"{datetime.date.today().strftime('%Y-%m-%d')}")
     
     def setting_rule(self,params):
         
@@ -164,7 +164,7 @@ class CreateDeliveryPromocodeAPP(tk.Frame):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root = CreateDeliveryPromocodeAPP(master=root)
+    root = CreateSendDataAPP(master=root)
     
     #GUI画面の起動
     root.mainloop()

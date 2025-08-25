@@ -8,8 +8,8 @@ grid_param = {
 # GUI画面の設定
 sent_type_option = ["Manual","Voucher"]
 reward_type_option = {
-             "Manual"    :["プロモコード","他社特典／デジタルコード","他社特典／URL","リマインド配信","auPAY残高還元"]
-            ,"Voucher"   :["プロモコード","他社特典／コード","他社特典／URL（単一）","他社特典／URL（複数）"]
+             "Manual"    :["プロモコード","他社特典／デジタルコード","他社特典／URL","他社特典／ローソンお買物券","リマインド配信","auPAY残高還元リマインド"]
+            ,"Voucher"   :["プロモコード","他社特典／コード","他社特典／URL（単一）","他社特典／URL（複数）","他社特典／ローソンお買物券"]
 }
 
 # 環境設定
@@ -23,18 +23,36 @@ env_setting = {
         ,"mapping_path":"{base}/etc/mapping.ini"
         ,"edit_path":"{base}/etc/edit.ini"
         ,"module_path":"{base}/lib/data_process.py"
-        ,"export_path":"D:/work/python/{campaign_flg}/"
+        ,"export_path":"D:/work/python/{campaign_flg}_promocode/"
         ,"upload_path":"{export_path}upload/"
         ,"src_path":"{export_path}src/"
-        ,"export_file":"No.8_{filename}.csv"
         ,"log_path":"{base}/mst/"
-        ,"log_name":None
+        ,"export_file":"No.8_{filename}.csv"
+        ,"log_name":"execelog.xlsx"
+        ,"sheet_name":"log"
+    }
+    ,"CreateSendDataAPP.pyw":{
+        "target":"senddata"
+        ,"env_path":"{base}/etc/env_settings.py"
+        ,"setting_path":"{base}/etc/settings.py"
+        ,"mapping_path":"{base}/etc/mapping.ini"
+        ,"edit_path":"{base}/etc/edit.ini"
+        ,"module_path":"{base}/lib/data_process.py"
+        ,"export_path":"D:/work/python/{campaign_flg}_senddata/"
+        ,"upload_path_01":"{export_path}upload/snowflake/"
+        ,"upload_path_02":"{export_path}upload/clevertap/"
+        ,"src_path":"{export_path}src/"
+        ,"log_path":"{base}/mst/"
+        ,"export_file_01":"No.5_{campaign_flg}_RSH.csv"
+        ,"export_file_02":"{campaign_flg}.csv"
+        ,"log_name":"execelog.xlsx"
         ,"sheet_name":"log"
     }
 }
 
 # ログファイル名の定義
-log_files = {
+check_file = {
     "Manual@プロモコード":"チェックファイル_M_#10.xlsx"
     ,"Manual@他社特典／デジタルコード":"チェックファイル_M_#11.xlsx"
+    ,"Voucher@プロモコード":"チェックファイル_V_#10.xlsx"
 }
